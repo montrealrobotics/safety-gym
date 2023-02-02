@@ -1016,7 +1016,8 @@ class Engine(gym.Env, gym.utils.EzPickle):
             pos = np.asarray(pos)
             if pos.shape == (3,):
                 pos = pos[:2]  # Truncate Z coordinate
-            z = np.complex(*self.ego_xy(pos))  # X, Y as real, imaginary components
+            z_t = self.ego_xy(pos)
+            z = complex(*self.ego_xy(pos))   #real=z_t[0], imag=z_t[1])  # X, Y as real, imaginary components
             dist = np.abs(z)
             angle = np.angle(z) % (np.pi * 2)
             bin_size = (np.pi * 2) / self.lidar_num_bins
