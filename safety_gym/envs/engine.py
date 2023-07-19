@@ -95,6 +95,10 @@ class Engine(gym.Env, gym.utils.EzPickle):
 
     # Default configuration (this should not be nested since it gets copied)
     DEFAULT = {
+        'probabilistic_termination': False, # Terminate an episode probabilistically if constaint is violated. 
+        'termination_prob': 0.4,
+
+        'early_termination': True, # Terminate if a constraint is violated even once. 
         'num_steps': 1000,  # Maximum number of environment steps in an episode
 
         'action_noise': 0.0,  # Magnitude of independent per-component gaussian action noise
@@ -1270,7 +1274,21 @@ class Engine(gym.Env, gym.utils.EzPickle):
             reward = self.reward()
 
             # Constraint violations
-            info.update(self.cost())
+            cost = self.cost()
+            info.update(cost)
+
+            ## Prob termination 
+            if self.probabilistic_termination and cost["cost"] > 0: 
+                if np.random.randn() < self.termination_prob:
+                    self.done = True 
+
+            ## Early termination 
+            if self.early_termination and cost["cost"] > 0:
+                self.done = True 
+
+            
+
+            
 
             # Button timer (used to delay button resampling)
             self.buttons_timer_tick()
